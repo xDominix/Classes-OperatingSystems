@@ -1,0 +1,15 @@
+-> hello world / bibliteka statyczna
+gcc -c stringlibrary.c
+ar cr libstringlibrary.a stringlibrary.o
+gcc main.c -o main -L. -lstringlibrary
+./main
+
+-> /bibliteka wspoldzielona
+gcc -fPIC -c sharedstringlibrary.c
+gcc -shared -fPIC -o libsharedstringlibrary.so sharedstringlibrary.o (od shared object)
+gcc sharedmain.c -o sharedmain -L -lsharedstringlibrary
+./sharedmain (?)
+export LD_LIBRARY_PATH=/home/xdominix/sysopylab/libsharedstringlibrary.so (beez ...so??)(jesli problem ze znalezniem biblioteki)
+
+->calloc (malloc zeruje, calloc nie)
+

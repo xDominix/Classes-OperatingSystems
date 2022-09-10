@@ -1,0 +1,24 @@
+Size of file: 53
+Lib time: 0.153000
+Sys time: 0.171000
+
+Size of file: 53
+Lib time: 0.114000
+Sys time: 0.180000
+
+Size of file: 53
+Lib time: 0.117000
+Sys time: 0.185000
+
+Size of file: 189
+Lib time: 0.107000
+Sys time: 0.565000
+
+Size of file: 189
+Lib time: 0.128000
+Sys time: 0.616000
+
+Size of file: 189
+Lib time: 0.127000
+Sys time: 0.641000
+
