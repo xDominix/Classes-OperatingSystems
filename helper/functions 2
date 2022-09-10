@@ -1,0 +1,107 @@
+get - tworzenie
+ctl - control // IPC_RMID
+>>>>MESSAGE<<<<
+SYSTEM V // msg
+//server
+qid = msgget(key, IPC_CREAT | IPC_EXCL | 0666); (key_t key = ftok(path, getpid()))
+my_msg msg; msgsnd(qid, &msg, MSG_SIZE, IPC_NOWAIT);
+msgctl(qid, IPC_RMID, NULL);
+//client
+key_t ckey = ftok(path, getpid());
+cid = msgget(ckey, IPC_CREAT | IPC_EXCL | 0666);
+my_msg msg; msgrcv(cid, &msg, MSG_SIZE, 0, MSG_EXCEPT);
+msgctl(cid, IPC_RMID, NULL);
+
+POSIX // mq
+struct mq_attr my; my.mq_msgsize = MSG_SIZE;
+return mq_open(*name,O_CREAT|O_RDWR|O_NONBLOCK,0666,&my); //or mq_setattr()
+mq_send //qid, &msg, MSG_SIZE, priority
+mq_receive //qid, &msg, MSG_SIZE, priority
+mq_unlink(*name);
+
+>>>>SEMAFORY<<<< SYNCHRONIZACJA AKCJI / ZAGWARANTOWANIE NIE PISANIA W TABLICY PRZEZ PARE PROCESOW, WAIT -> PISANIE -> POST
+SYSTEM V
+semID = semget(semKey, 1, IPC_CREAT | IPC_EXCL | 0666); (semKey = ftok(path , getpid());)
+union semun arg; arg.val = -1;//wait
+union semun arg; arg.val = 1;//post / init
+semctl(semID, 0, SETVAL, arg);
+semctl(semID,0,IPC_RMID);
+
+POSIX
+sem_t *sem_id= sem_open("siemano", O_CREAT, 0644, 1); //1 -init
+sem_wait(sem_id);
+sem_post(sem_id);
+sem_close(sem_id);
+
+>>>>SEMAFORY NIENAZWANE (W MIARE NIE WYMAGANE)<<<<
+sem_t sem;
+sem_init(&sem, this, 1); // this !=0 for processes, this =0 for threads
+sem_wait(&sem);
+sem_post(&sem);
+sem_destroy(&sem);
+
+>>>>PAMIEC WSPOLDZIELONA<<<< DLA WIELU PROCESOW CO ZNAJA  shmKey, PISANIE JEST RISKY CHYBA ZE ZASTOSUJESZ SEMAFORY!
+SYSTEM V
+shmID = shmget(shmKey, sizeof(Oven) + sizeof(Table), IPC_CREAT | IPC_EXCL | 0666); - uzyskanie zbioru segmentow
+oven = shmat(shmID, NULL, 0); - uzyskanie segmentu
+shmdt(oven);
+shmctl(shmID, IPC_RMID, NULL);
+
+POSIX
+shm_fd = shm_open(*name, O_CREAT | O_RDWR, 0666);
+ftruncate(shm_fd, SIZE);
+oven = mmap(NULL, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0);
+munmap(oven,SIZE);
+shm_unlink(*name);
+
+>>>>WATKI<<<<
+pthread_create(&hello_threads[i], NULL, hello, (void *)&i)
+pthread_join(hello_threads[i], (void **) &hello_results[i]);
+void *hello(void *arg) { int *myarg = (int*)arg; printf("Hello %d: %d\n",*myarg,gettid()); return arg;}
+
+>>>>WATKI - SYNCHRONIZACJA<<<<
+int x,y;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond   = PTHREAD_COND_INITIALIZER;
+
+// (Watek 1)
+pthread_mutex_lock(&mutex);
+while (x <= y) pthread_cond_wait(&cond, &mutex);
+pthread_mutex_unlock(&mutex);
+
+// (Watek 2)
+pthread_mutex_lock(&mutex);
+/* zmiana x oraz y */
+if (x > y)  pthread_cond_broadcast(&cond);
+pthread_mutex_unlock(&mutex);
+---------------------------
+pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)  //custom mutex
+pthread_cond_init(pthread_cond_t *cond, pthread_condattr_t *attr); //custom cond
+
+>>>>SOCKETY<<<<
+SERVER:
+    - sock_fd = socket(AF_UNIX/AF_INET, SOCK_STREAM/SOCK_DGRAM, 0)
+    - stwórz struct sockaddr_un/in! name,
+        - memset(&name, 0, sizeof(name))
+        - name.sun_family = AF_UNIX/AF_INET
+        - strcpy(sock_addr.sun_path, path_given_as_an_arg) //unix
+        - name.sin_addr.s_addr = inet_addr("127.0.0.1") or INADDR_ANY //inet
+        - name.sin_port = htons(port_nb)//inet
+    - unlink(path_given_as_an_arg)
+    - bind(sock_fd, (struct sockaddr *) &name, sizeof(name))
+    - listen(sock_fd, MAX_NB_OF_CLIENTS)
+    - accept(sock_fd, struct sockaddr *addr, socklen_t * addrlen) //fill addr
+CLIENT:
+	- sock_fd = socket(AF_UNIX/AF_INET, SOCK_STREAM/SOCK_DGRAM, 0)
+	- stwórz struct sockaddr_un/in! name;
+	    - memset(&name, 0, sizeof(name))
+	    - nazwa.sun_family = AF_UNIX/AF_INET
+	    - strcpy(nazwa.sun_path, addres_given) //unix
+	    - nazwa.port = htons(port_nb) //inet
+        - name.sin_addr.s_addr = inet_addr("127.0.0.1") or INADDR_ANY //inet
+    - connect(sock_fd, (struct sockaddr *)&nazwa, sizeof(nazwa))
+
+- write(sock_fd, const void* buf, size_t count))
+- read(sock_fd, const void *buf, size_t len) //fill buf
+- shutdown(sock_fd, SHUT_RDWR) //wychodzi z serwera
+- close(sock_fd), na końcu pracy

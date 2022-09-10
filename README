@@ -1,0 +1,12 @@
+OPERATION SYSTEMS
+
+LANGUAGE: C
+CHAPTERS:
+	1. Library compilation and development,
+	2. Threading (semaphores),
+	3. Linux pipes,
+	4. File handling,
+	5. File parsing,
+	6. Buffers (producers & consumers problem),
+	7. Mapped memory,
+	and more...

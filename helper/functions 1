@@ -1,0 +1,33 @@
+(int)
+open
+write
+read
+close
+
+(FILE)
+fopen
+fread
+fwrite
+fputc
+fclose
+
+(PATH)
+lstat
+
+(SIGNALS)
+sigprocmask
+sigaction
+sigsuspend
+sigqueue
+
+(int) close //STDOUT_FILENO , STDIN_FILENO
+pipe
+dup2
+execlp
+
+(FILE) fputs
+popen
+pclose
+
+(int) open read write close
+mkfifo
