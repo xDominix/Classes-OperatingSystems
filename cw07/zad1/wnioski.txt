@@ -1,0 +1,7 @@
+Pisanie do pamieci wspolnej nie jest wadliwe przy wielu procesach (pikarzy,dostawcow) na raz.
+W niektorych momentach program losuje takie same typy pizz, co pokazuje ze program dziala poprawnie. (gdyz system jest oparty na losowaniu w oparciu o czas, a semafory dbaja o spojnosc czasu)
+
+Zauwazylem utrzymanie kolejnosci wydawanych zamowien oraz wlasciwego czasu pieczenia i dostaw.
+Widac zsynchronizowane wydawanie produktow i dostarczanie ich.
+
+Semafory doskonale wykonuja robote w tym zadaniu.
