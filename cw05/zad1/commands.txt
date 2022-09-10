@@ -1,0 +1,2 @@
+cat /etc/passwd | grep 11
+ls -l | wc -l
